@@ -40,6 +40,8 @@
     receiver_trait,
 )]
 use core;
+extern crate alloc;
+// use alloc;
 
 mod allocator;
 pub mod bindings;
