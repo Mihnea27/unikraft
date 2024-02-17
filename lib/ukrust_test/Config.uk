@@ -1,0 +1,4 @@
+menuconfig LIBUKRUSTTEST
+	bool "ukrusttest: test library in rust"
+	select LIBUKRUST
+	default n
