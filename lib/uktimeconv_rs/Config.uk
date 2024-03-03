@@ -1,0 +1,4 @@
+config LIBUKTIMECONV
+	bool "uktimeconv_rs: timeconv library writtten in rust"
+	select LIBUKRUST
+	default n
