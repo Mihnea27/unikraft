@@ -63,6 +63,9 @@
 #elif CONFIG_LIBUKBOOT_INITTINYALLOC
 #include <uk/tinyalloc.h>
 #define uk_alloc_init uk_tinyalloc_init
+#elif CONFIG_LIBUKRSALLOC
+#include <uk/rsalloc.h>
+#define uk_alloc_init uk_rsalloc_init
 #endif
 #if CONFIG_LIBUKSCHED
 #include <uk/sched.h>

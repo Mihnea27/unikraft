@@ -117,6 +117,10 @@ if LIBUKBOOT
 		depends on LIBTLSF_INCLUDED
 		select LIBTLSF
 
+		config LIBUKBOOT_INITRSALLOC
+		bool "RSALLOC"
+		select LIBUKRSALLOC
+
 		config LIBUKBOOT_NOALLOC
 		bool "None"
 
