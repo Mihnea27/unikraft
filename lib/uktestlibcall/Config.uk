@@ -1,0 +1,3 @@
+menuconfig LIBUKTESTCALL
+	bool "uktestcall: test library in rust"
+	default n

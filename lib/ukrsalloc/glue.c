@@ -16,15 +16,18 @@ struct RsAlloc {
 	struct Allocation allocations[MAX_ALLOCATIONS];
 	size_t heap_start;
 	size_t heap_end;
+	size_t mem_used;
 };
 
 extern void* rsalloc_malloc(struct RsAlloc* alloc, size_t size);
 extern void rsalloc_free(struct RsAlloc* alloc, void* ptr);
 extern void rsalloc_init(struct RsAlloc* alloc, void* heap_base, size_t size);
-
+extern int rsalloc_addmem(struct RsAlloc* alloc, size_t len);
+extern size_t rsalloc_availmem(struct RsAlloc* alloc);
 
 static void *uk_rsalloc_malloc(struct uk_alloc* a, size_t size)
 {
+uk_pr_info("malloc for %d \n", size);
 	struct RsAlloc* b;
 	b = (struct RsAlloc*)&a->priv;
 	return rsalloc_malloc(b, size);
@@ -32,11 +35,32 @@ static void *uk_rsalloc_malloc(struct uk_alloc* a, size_t size)
 
 static void uk_rsalloc_free(struct uk_alloc* a, void* ptr)
 {
+uk_pr_info("free\n");
 	struct RsAlloc* b;
 	b = (struct RsAlloc*)&a->priv;
 	rsalloc_free(b, ptr);
 }
 
+static int uk_rsalloc_addmem(struct uk_alloc* a, size_t size)
+{
+uk_pr_info("addmem\n");
+	struct RsAlloc* b;
+	b = (struct RsAlloc*)&a->priv;
+	return rsalloc_addmem(b, size);
+}
+
+// static size_t uk_rsalloc_availmem(struct uk_alloc* a)
+// {
+// uk_pr_info("availmem\n");
+// 	struct RsAlloc* b;
+// 	b = (struct RsAlloc*)&a->priv;
+// 	return rsalloc_availmem(b);
+// }
+
+// static size_t uk_rsalloc_maxalloc(struct uk_alloc* a)
+// {
+// 	return 0;
+// }
 
 struct uk_alloc* uk_rsalloc_init(void* base, size_t len)
 {
@@ -64,6 +88,6 @@ struct uk_alloc* uk_rsalloc_init(void* base, size_t len)
 	rsalloc_init(b, base + metalen, base + len);
 	uk_pr_info("Initialise rsallocator\n");
 	uk_alloc_init_malloc_ifmalloc(a, uk_rsalloc_malloc, uk_rsalloc_free,
-					NULL, NULL, NULL);
+					NULL, NULL, uk_rsalloc_addmem);
 	return a;
 }

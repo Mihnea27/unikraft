@@ -168,7 +168,7 @@ static struct uk_alloc *heap_init()
 	rc = uk_vas_init(&kernel_vas, pt, a);
 	if (unlikely(rc))
 		return NULL;
-
+	uk_pr_info("Initialised vad\n");
 	rc = uk_vas_set_active(&kernel_vas);
 	if (unlikely(rc))
 		return NULL;
@@ -181,6 +181,7 @@ static struct uk_alloc *heap_init()
 			     (alloc_pages + HEAP_INITIAL_PAGES) << PAGE_SHIFT,
 			     PAGE_ATTR_PROT_RW, UK_VMA_MAP_UNINITIALIZED,
 			     "heap");
+	uk_pr_info("Mapeed anon memory\n");
 	if (unlikely(rc))
 		return NULL;
 
