@@ -1,7 +1,7 @@
 #![no_std]
 
 const MAX_ALLOCATIONS: usize = 128;
-const ALIGNMENT: uszie = 16;
+const ALIGNMENT: usize = 16;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -13,8 +13,8 @@ pub struct Allocation {
 
 #[repr(C)]
 pub struct RsAlloc {
-    allocations: [Option<Allocation>; MAX_ALLOCATIONS],
-    free_allocations: [bool, MAX_ALLOCATIONS],
+    allocations: [Allocation; MAX_ALLOCATIONS],
+    free_allocations: [bool; MAX_ALLOCATIONS],
     next_free_slot: usize,
     heap_start: usize,
     heap_end: usize,
@@ -24,7 +24,7 @@ pub struct RsAlloc {
 impl RsAlloc {
     const fn new() -> Self {
         Self {
-            allocations: [None; MAX_ALLOCATIONS],
+            allocations: [Allocation{used: 0, start: 0, size: 0}; MAX_ALLOCATIONS],
             free_allocations: [true; MAX_ALLOCATIONS],
 	    next_free_slot: 0,
 	    heap_start: 0,
@@ -40,7 +40,7 @@ impl RsAlloc {
     }
 
     fn malloc(&mut self, size: usize) -> Option<*mut u8> {
-        if (size == 0) return None;
+	if size == 0 {return None;}
 	let mut current_address = self.heap_start;
         for allocation in &mut self.allocations {
             if allocation.used == 0 {
@@ -75,7 +75,7 @@ impl RsAlloc {
 	return 0;
     }
 
-    const fn availmem(&self) -> usize {
+    fn availmem(&mut self) -> usize {
 	self.heap_end - self.heap_start - self.mem_used
     }
 }
