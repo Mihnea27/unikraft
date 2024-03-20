@@ -13,70 +13,64 @@ pub struct Allocation {
 
 #[repr(C)]
 pub struct RsAlloc {
-    allocations: [Allocation; MAX_ALLOCATIONS],
-    free_allocations: [bool; MAX_ALLOCATIONS],
-    next_free_slot: usize,
     heap_start: usize,
     heap_end: usize,
-    mem_used: usize,
+    next_addr: usize,
+    total_alloc: usize,
 }
+
+
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
+
 
 impl RsAlloc {
     const fn new() -> Self {
         Self {
-            allocations: [Allocation{used: 0, start: 0, size: 0}; MAX_ALLOCATIONS],
-            free_allocations: [true; MAX_ALLOCATIONS],
-	    next_free_slot: 0,
 	    heap_start: 0,
             heap_end: 0,
-	    mem_used: 0,
+	    next_addr: 0,
+	    total_alloc: 0,
         }
     }
 
     fn init(&mut self, heap_base: usize, heap_size: usize) {
         self.heap_start = heap_base;
         self.heap_end = heap_base + heap_size;
-	self.mem_used = 0;
+	self.next_addr = heap_base;
+	self.total_alloc = 0;
     }
 
     fn malloc(&mut self, size: usize) -> Option<*mut u8> {
 	if size == 0 {return None;}
-	let mut current_address = self.heap_start;
-        for allocation in &mut self.allocations {
-            if allocation.used == 0 {
-                if current_address + size <= self.heap_end {
-                    allocation.used = 1;
-                    allocation.start = current_address;
-                    allocation.size = size;
-                    current_address += size;
-		    self.mem_used += size;
-                    return Some(allocation.start as *mut u8);
-                }
-            } else {
-                current_address += allocation.size;
-            }
-        }
-        None
+	let start_addr = self.next_addr;
+	let end_addr = start_addr + size;
+
+	if end_addr >= self.heap_end {
+	    None
+	} else {
+	    self.next_addr = end_addr;
+	    self.total_alloc += 1;
+	    Some(start_addr as *mut u8)
+	}
+
     }
 
     fn free(&mut self, ptr: *mut u8) {
-        let address = ptr as usize;
-        for allocation in &mut self.allocations {
-            if allocation.used == 1 && allocation.start == address {
-                allocation.used = 0;
-                self.mem_used -= allocation.size;
-		break;
-            }
-        }
+	self.total_alloc -= 1;
+	if self.total_alloc == 0 {
+	    self.next_addr = self.heap_start;
+	}
     }
 
-    fn addmem(&mut self, value: usize) -> i32 {
+    fn addmem(&mut self, base: *mut u8, value: usize) -> i32 {
 	self.heap_end += value;
-	return 0;
+	0
     }
 
     fn availmem(&mut self) -> usize {
-	self.heap_end - self.heap_start - self.mem_used
+	self.heap_end - self.next_addr
     }
 }
 
@@ -99,9 +93,9 @@ pub extern "C" fn rsalloc_free(allocator: *mut RsAlloc, ptr: *mut u8) {
 }
 
 #[no_mangle]
-pub extern "C" fn rsalloc_addmem(allocator: *mut RsAlloc, len: usize) -> i32 {
+pub extern "C" fn rsalloc_addmem(allocator: *mut RsAlloc, base: *mut u8, len: usize) -> i32 {
     let allocator = unsafe {&mut *allocator};
-    return allocator.addmem(len);
+    return allocator.addmem(base, len);
 }
 
 // #[no_mangle]
