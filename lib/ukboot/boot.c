@@ -345,6 +345,7 @@ void ukplat_entry(int argc, char *argv[])
 	ukplat_tlsp_set(ukarch_tls_tlsp(tls));
 
 	/* Allocate auxiliary stack for this execution context */
+	uk_pr_info("Will allocate auxstack with %d\n", UKPLAT_AUXSP_LEN);
 	auxstack = uk_memalign(uk_alloc_get_default(),
 			       UKPLAT_AUXSP_ALIGN, UKPLAT_AUXSP_LEN);
 	if (unlikely(!auxstack))

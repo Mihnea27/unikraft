@@ -41,7 +41,7 @@ uk_pr_info("malloc for %d \n", size);
 
 static void uk_rsalloc_free(struct uk_alloc* a, void* ptr)
 {
-uk_pr_info("free\n");
+uk_pr_info("free pointer at: %d", (int)ptr);
 	struct RsAlloc* b;
 	b = (struct RsAlloc*)&a->priv;
 	rsalloc_free(b, ptr);
@@ -49,19 +49,19 @@ uk_pr_info("free\n");
 
 static int uk_rsalloc_addmem(struct uk_alloc* a, void* base, size_t size)
 {
-// uk_pr_info("addmem for %d\n", size);
+uk_pr_info("addmem for %d\n", size);
 	struct RsAlloc* b;
 	b = (struct RsAlloc*)&a->priv;
 	return rsalloc_addmem(b, base, size);
 }
 
-// static size_t uk_rsalloc_availmem(struct uk_alloc* a)
-// {
-// uk_pr_info("availmem\n");
-// 	struct RsAlloc* b;
-// 	b = (struct RsAlloc*)&a->priv;
-// 	return rsalloc_availmem(b);
-// }
+static size_t uk_rsalloc_availmem(struct uk_alloc* a)
+{
+uk_pr_info("availmem\n");
+	struct RsAlloc* b;
+	b = (struct RsAlloc*)&a->priv;
+	return rsalloc_availmem(b);
+}
 
 // static size_t uk_rsalloc_maxalloc(struct uk_alloc* a)
 // {
@@ -94,6 +94,6 @@ struct uk_alloc* uk_rsalloc_init(void* base, size_t len)
 	rsalloc_init(b, base + metalen, base + len);
 	uk_pr_info("Initialise rsallocator with %d\n", len);
 	uk_alloc_init_malloc_ifmalloc(a, uk_rsalloc_malloc, uk_rsalloc_free,
-					NULL, NULL, NULL);
+					NULL, uk_rsalloc_availmem, uk_rsalloc_addmem);
 	return a;
 }

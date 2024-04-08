@@ -44,7 +44,7 @@ impl RsAlloc {
 
     fn malloc(&mut self, size: usize) -> Option<*mut u8> {
 	if size == 0 {return None;}
-	let start_addr = self.next_addr;
+	let start_addr = align_up(self.next_addr, ALIGNMENT);
 	let end_addr = start_addr + size;
 
 	if end_addr >= self.heap_end {
@@ -69,7 +69,7 @@ impl RsAlloc {
 	0
     }
 
-    fn availmem(&mut self) -> usize {
+    fn availmem(&self) -> usize {
 	self.heap_end - self.next_addr
     }
 }
@@ -98,8 +98,8 @@ pub extern "C" fn rsalloc_addmem(allocator: *mut RsAlloc, base: *mut u8, len: us
     return allocator.addmem(base, len);
 }
 
-// #[no_mangle]
-// pub extern "C" fn rsalloc_availmem(allocator: *mut RsAlloc) -> usize {
-//     let allocator = unsafe {& *allocator};
-//     allocator.availmem()
-// }
+#[no_mangle]
+pub extern "C" fn rsalloc_availmem(allocator: *mut RsAlloc) -> usize {
+    let allocator = unsafe {& *allocator};
+    allocator.availmem()
+}

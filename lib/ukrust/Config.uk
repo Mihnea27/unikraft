@@ -1,4 +1,4 @@
-config LIBUKRUST
+menuconfig LIBUKRUST
 	bool "ukrust: Rust support for Unikraft's internals"
 	depends on ARCH_X86_64
 	select LIBUKDEBUG
@@ -9,3 +9,13 @@ config LIBUKRUST
 	  It exports Rust bindings over the Unikraft API as well
 	  as provide other useful functionalities such as a global
 	  allocator.
+
+if LIBUKRUST
+
+config  LIBUKRSALLOC
+	bool "ukrsalloc: rust implementation for ukalloc"
+	select LIBUKALLOC
+	select LIBNOLIBC if !HAVE_LIBC
+	default n
+
+endif

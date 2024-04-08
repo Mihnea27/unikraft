@@ -61,6 +61,18 @@ $(LIBUKRUST_BUILD)/compiler_builtins.o: $(LIBUKRUST_BASE)/compiler_builtins.rs $
 # UK_PREPARE-$(CONFIG_LIBUKRUST) += $(LIBUKRUST_BUILD)/ukrust_sys.o \
 # 		 $(LIBUKRUST_BUILD)/core.o $(LIBUKRUST_BUILD)/compiler_builtins.o
 
+CINCLUDES-$(CONFIG_LIBUKRUST)   += -I$(LIBUKRUST_BASE)/rust_libs/ukrsalloc/include
+CXXINCLUDES-$(CONFIG_LIBUKRUST) += -I$(LIBUKRUST_BASE)/rust_libs/ukrsalloc/include
+
+$(LIBUKRUST_BUILD)/ukrsalloc.o: $(LIBUKRUST_BASE)/rust_libs/ukrsalloc/src/lib.rs $(LIBUKRUST_BUILD)/ukrust_sys.o
+	$(call build_cmd, RUSTC, libukrust, $(notdir $@), \
+	$(RUSTC) $(LIBUKRUST_COMMON_FLAGS) \
+	--out-dir $(LIBUKRUST_BUILD) -L $(LIBUKRUST_BUILD) --extern ukrust_sys --extern core --extern alloc \
+		-A dead_code --emit=dep-info --emit=obj=$@ --emit=metadata=$(dir $@)$(patsubst %.o,lib%.rmeta,$(notdir $@)) \
+		-A unused_doc_comments --crate-name ukrsalloc $(LIBUKRUST_BASE)/rust_libs/ukrsalloc/src/lib.rs)
+
+LIBUKRUST_OBJS-y += $(LIBUKRUST_BUILD)/ukrsalloc.o
+LIBUKRUST_SRCS-y += $(LIBUKRUST_BASE)/rust_libs/ukrsalloc/glue.c
 
 LIBUKRUST_OBJS-y += $(LIBUKRUST_BUILD)/ukrust_sys.o
 LIBUKRUST_OBJS-y += $(LIBUKRUST_BUILD)/core.o

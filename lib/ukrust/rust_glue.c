@@ -43,6 +43,11 @@
 #include <uk/arch/types.h>
 #endif
 
+void mock_symbol()
+{
+
+}
+
 void *__ukrust_sys_malloc(__sz size)
 {
 #if CONFIG_LIBUKALLOC
