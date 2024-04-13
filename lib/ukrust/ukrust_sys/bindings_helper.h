@@ -63,6 +63,8 @@
 
 #include <uk/plat/console.h>
 #include <uk/arch/types.h>
+#include <uk/timeconv.h>
+#include <uk/timeutil.h>
 
 void *__ukrust_sys_malloc(__sz size);
 void __ukrust_sys_free(void *ptr);
